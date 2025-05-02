@@ -28,7 +28,7 @@ const tasks = mongoose.Schema({
       }],
     assignedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'Nurse'
     }
     
 })

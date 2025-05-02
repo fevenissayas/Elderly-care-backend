@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
-    assignedNurse: {
+    assignedTo: {
         type: Schema.Types.ObjectId,
         ref: 'Nurse'
     }
