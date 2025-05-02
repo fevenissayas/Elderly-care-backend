@@ -111,12 +111,21 @@ export const assignNurse = async (req, res) => {
             })
         }
 
-        const updateUser = await User.findByIdAndDelete(userId,
-            { assignNurse: nurseId}, {new: TransformStreamDefaultController}
-        )
-        if (!updateUser){
-            return res.status(404).json({ message: "User not found" });
+        const user = await User.findById(userId)
+        if (!user){
+            return res.status(404).json({
+                message: "user not Found"
+            })
         }
+
+        user.assignedNurse = nurse._id;
+        await user.save();
+
+        if (!nurse.users.includes(user._id)) {
+            nurse.users.push(user._id);
+            await nurse.save();
+        }
+    
         res.status(200).json({ message: "Nurse assigned successfully", user: updateUser });
     
     } catch (error) {

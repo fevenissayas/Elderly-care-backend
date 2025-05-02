@@ -1,5 +1,5 @@
 import express from "express"
-import { verifyToken } from "../middleware/auth.middleware"
+import { verifyToken } from "../middleware/auth.middleware.js"
 
 const taskRouter = express.Router()
 
