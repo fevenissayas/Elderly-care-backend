@@ -70,7 +70,7 @@ export const login = async (req, res) => {
 export const updateProfile = async (req, res) => {
     const { name,email, caretaker, gender, phoneNo, address } = req.body;
     console.log(req.user)
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     try {
         const updatedUser = await User.findByIdAndUpdate(
@@ -78,7 +78,7 @@ export const updateProfile = async (req, res) => {
           { name,email, caretaker, gender, phoneNo, address },
           { new: true }
         );
-    
+
         if (!updatedUser) {
           return res.status(404).json({ message: "User not found" });
         }
@@ -125,7 +125,7 @@ export const assignNurse = async (req, res) => {
             nurse.users.push(user._id);
             await nurse.save();
         }
-    
+        
         res.status(200).json({ message: "Nurse assigned successfully", user: updateUser });
     
     } catch (error) {
