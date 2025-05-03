@@ -4,7 +4,7 @@ export const tasks = async (req, res) => {
 
     const userId = req.user.id
     try {
-        const user = await User.findById(userId).populate("tasks").populate("assignedTo")
+        const user = await User.findById(userId).populate("tasks")
         if (!user) {
             return res.status(404).json({ message: "User not found" });
           }

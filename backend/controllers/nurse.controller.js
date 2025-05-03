@@ -83,10 +83,11 @@ export const getUsers = async (req, res) => {
 
 export const assignTask = async (req, res) => {
     const assignedBy = req.params.id
-    const { schedule, startDate, endDate, assignedTo } = req.body;
+    const { schedule,frequency, startTime, endTime, assignedTo } = req.body;
 
-    const task = new Task({ schedule, startDate, endDate, assignedTo, assignedBy});
+    const task = new Task({ schedule, frequency, startTime, endTime, assignedTo, assignedBy});
     await task.save();
+
 
     if (assignedTo) {
 
@@ -98,7 +99,6 @@ export const assignTask = async (req, res) => {
 
         return res.status(200).json({ message: "Task assigned to user" });
     } else {
-
         const allUsers = await User.find();
         await Promise.all(allUsers.map(user => {
         user.tasks.push(task._id);

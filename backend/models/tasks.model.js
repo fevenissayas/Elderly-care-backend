@@ -8,14 +8,17 @@ const tasks = mongoose.Schema({
         required: true
     },
 
-    startDate: {
+    startTime: {
         type: Date,
     },
 
-    endDate: {
+    endTime: {
         type: Date,
     },
     
+    frequency:{
+        type: String,
+    },
 
     done: {
         type: Boolean,
