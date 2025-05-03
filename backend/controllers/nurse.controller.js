@@ -47,32 +47,9 @@ export const signup = async (req, res) => {
     }
 }
 
-export const login = async (req, res) => {
-
-    const {email, password} = req.body
-    console.log({email, password})
-
-    const nurse = await Nurse.findOne({ email });
-
-    if (!nurse){
-        return res.status(400).json({message: "Invalid Email"})
-    }
-
-    const matchp = await bcrypt.compare(password, nurse.password)
-
-    if(!matchp){
-        return res.status(400).json({message: "Invalid Password"})
-    }
-
-    const token = jwt.sign({id: nurse._id, email: nurse.email, role: nurse.role}, process.env.JWT_SECRET,{expiresIn: '24hr'})
-    res.status(201).json({message: "Logged in successfully", token })
-}
-
-
-
 export const getUsers = async (req, res) => {
     try{
-        const users = await User.find({}, "name profileImg email tasks");
+        const users = await User.find({}, "name id profileImg email tasks");
 
         res.status(200).json({users})
 
@@ -80,6 +57,96 @@ export const getUsers = async (req, res) => {
         res.status(500).json({ message: "Failed to get users", error: error.message });
     }
 }
+
+
+export const getUserDetails = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findOne({ id: userId });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            name: user.name,
+            email: user.email,
+            heartRate: user.heartRate,
+            sugarLevel: user.sugarLevel,
+            bloodPressure: user.bloodPressure,
+            bloodType: user.bloodType,
+            description: user.description,
+            nurse: user.nurse,
+        });
+    } catch (error) {
+        console.error("Error fetching user details:", error.message);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const updateUserDetails = async (req, res) => {
+    const { userId } = req.params;
+    const { heartRate, sugarLevel, bloodPressure, bloodType, description } = req.body;
+
+    try {
+        const user = await User.findOne({ id: userId });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.heartRate = heartRate ?? user.heartRate;
+        user.sugarLevel = sugarLevel ?? user.sugarLevel;
+        user.bloodPressure = bloodPressure ?? user.bloodPressure;
+        user.bloodType = bloodType ?? user.bloodType;
+        user.description = description ?? user.description;
+
+        await user.save();
+
+        res.status(200).json({ message: "User details updated", data: user });
+    } catch (error) {
+        console.error("Error updating user details:", error.message);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const updateProfile = async (req, res) => {
+    const { name, email, yearsOfExperience, username, phoneNo } = req.body;
+    const nurseId = req.user.id;
+  
+    try {
+      const updatedNurse = await Nurse.findByIdAndUpdate(
+        nurseId,
+        { name, email, yearsOfExperience, username, phoneNo },
+        { new: true }
+      );
+  
+      if (!updatedNurse) {
+        return res.status(404).json({ message: "Nurse not found" });
+      }
+  
+      res.status(200).json({ message: "Profile updated", data: updatedNurse });
+    } catch (error) {
+      console.error("Update failed:", error.message);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+
+export const getProfile = async (req, res) => {
+  const nurseId = req.user.id;
+
+  try {
+    const nurse = await Nurse.findById(nurseId).select("-password");
+    if (!nurse) {
+      return res.status(404).json({ message: "Nurse not found" });
+    }
+
+    res.status(200).json({ message: "Nurse profile fetched", data: nurse });
+  } catch (error) {
+    console.error("Failed to get nurse profile:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export const assignTask = async (req, res) => {
     const assignedBy = req.params.id

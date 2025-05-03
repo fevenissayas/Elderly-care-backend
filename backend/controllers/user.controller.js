@@ -47,25 +47,32 @@ export const signup = async (req, res) => {
 
 
 export const login = async (req, res) => {
-
-    const {email, password} = req.body
-    console.log({email, password})
-
-    const user = await User.findOne({ email });
-
-    if (!user){
-        return res.status(400).json({message: "Invalid Email"})
+    const { email, password } = req.body;
+    console.log({ email, password });
+  
+    let user = await User.findOne({ email });
+    if (!user) {
+        user = await Nurse.findOne({ email });
     }
-
-    const matchp = await bcrypt.compare(password, user.password)
-
-    if(!matchp){
-        return res.status(400).json({message: "Invalid Password"})
+  
+    if (!user) {
+        return res.status(400).json({ message: "Invalid Email" });
     }
-
-    const token = jwt.sign({id: user._id, email: user.email, role: user.role}, process.env.JWT_SECRET,{expiresIn: '1h'})
-    res.status(201).json({message: "Logged in successfully", token })
-}
+  
+    const matchp = await bcrypt.compare(password, user.password);
+  
+    if (!matchp) {
+        return res.status(400).json({ message: "Invalid Password" });
+    }
+  
+    const token = jwt.sign(
+        { id: user._id, email: user.email, role: user.constructor.modelName.toLowerCase() },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+    );
+  
+    res.status(200).json({ message: "Logged in successfully", token ,role: user.role });
+  };
 
 export const updateProfile = async (req, res) => {
     const { name,email, caretaker, gender, phoneNo, address } = req.body;
@@ -131,4 +138,4 @@ export const assignNurse = async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: "Failed to assign nurse", error: error.message });
     }
-}
+}  

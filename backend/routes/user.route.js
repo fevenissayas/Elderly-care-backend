@@ -7,7 +7,7 @@ import { tasks } from "../controllers/task.controller.js"
 const userRoutes = express.Router()
 userRoutes.put("/profile", verifyToken, updateProfile)
 userRoutes.get("/tasks", verifyToken,tasks)
-userRoutes.get("/nurse", verifyToken, getNurses)
+userRoutes.get("/nurse", getNurses)
 userRoutes.put("/assign-nurse",verifyToken, assignNurse)
 
 export default userRoutes

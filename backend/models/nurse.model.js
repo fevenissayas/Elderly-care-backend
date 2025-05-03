@@ -6,9 +6,23 @@ const nurseSchema = new Schema({
     required: true,
   },
 
+  username: {
+    type: String,
+    required: false,
+  },
+
   email: {
     type: String,
     required: true,
+    unique: true,
+  },
+  yearsOfExperience: {
+    type: String,
+    required: false,
+  },
+
+  id: {
+    type: String,
     unique: true,
   },
 

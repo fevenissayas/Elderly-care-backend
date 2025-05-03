@@ -59,6 +59,37 @@ const userSchema = new mongoose.Schema({
     assignedTo: {
         type: Schema.Types.ObjectId,
         ref: 'Nurse'
+    },
+    heartRate: {
+        type: String,
+        required: false,
+        default: ""
+    },
+
+    sugarLevel: {
+        type: String,
+        required: false,
+        default: ""
+    },
+    bloodPressure: {
+        type: String,
+        required: false,
+        default: ""
+    },
+
+    bloodType: {
+        type: String,
+        required: false,
+        default: ""
+    },
+    description: {
+        type: String,
+        required: false,
+        default: ""
+    },
+    assignedNurse: {
+        type: Schema.Types.ObjectId,
+        ref: 'Nurse'
     }
 
 }, {timestamps: true})
