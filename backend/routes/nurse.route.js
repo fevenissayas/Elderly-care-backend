@@ -8,7 +8,7 @@ nurseRoute.post("/addTask",verifyToken, assignTask)
 nurseRoute.post("/signup", signup)
 nurseRoute.get("/",verifyToken, getUsers)
 nurseRoute.put("/profile", verifyToken, updateProfile)
-nurseRoute.get("/profile", getProfile);
+nurseRoute.get("/profile", verifyToken, getProfile);
 nurseRoute.get("/user/:userId/details",verifyToken, getUserDetails);
 nurseRoute.put("/user/:userId/details", verifyToken, updateUserDetails);
 

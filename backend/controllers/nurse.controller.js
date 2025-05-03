@@ -133,6 +133,8 @@ export const updateProfile = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   const nurseId = req.user.id;
+  console.log("req.user:", req.user);
+
 
   try {
     const nurse = await Nurse.findById(nurseId).select("-password");
