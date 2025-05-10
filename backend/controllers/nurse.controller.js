@@ -6,20 +6,24 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 export const signup = async (req, res) => {
+    const nurse = req.body;
 
-
-    const nurse = req.body
-    if (!nurse.name || !nurse.email || !nurse.password){
+    if (!nurse.name || !nurse.email || !nurse.password) {
         return res.status(400).json({
-            message: "Please fill all the fields"
-        })
+            message: "Please fill all the fields",
+            success: false
+        });
     }
-    
+
     try {
-        const email = nurse.email
+        const email = nurse.email;
         const existingnurse = await Nurse.findOne({ email });
+
         if (existingnurse) {
-            return res.status(409).json({ message: "Email is already registered" });
+            return res.status(409).json({ 
+                success: false,
+                message: "Email is already registered", 
+            });
         }
 
         const counter = await Counter.findByIdAndUpdate(
@@ -27,9 +31,9 @@ export const signup = async (req, res) => {
             { $inc: { seq: 1 } },
             { new: true, upsert: true }
         );
-        
+
         const id = counter.seq.toString().padStart(6, "0");
-    
+
         const hashedPassword = await bcrypt.hash(nurse.password, 15);
         const newNurse = new Nurse({
             ...nurse,
@@ -39,13 +43,20 @@ export const signup = async (req, res) => {
 
         await newNurse.save();
 
-        res.status(201).json({ success: true, data: newNurse })
+        return res.status(201).json({ 
+            success: true, 
+            data: newNurse 
+        });
 
-    }catch(error) {
-        console.error("Error in nurse.controller:", error.message)
-        res.status(500).json({ success: false, message: "server error"})
+    } catch (error) {
+        console.error("Error in nurse.controller:", error.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Server error" 
+        });
     }
-}
+};
+
 
 export const getUsers = async (req, res) => {
     try{
@@ -54,7 +65,7 @@ export const getUsers = async (req, res) => {
         res.status(200).json({users})
 
     }catch (error){
-        res.status(500).json({ message: "Failed to get users", error: error.message });
+        res.status(500).json({ success: false, message: "Failed to get users", error: error.message });
     }
 }
 

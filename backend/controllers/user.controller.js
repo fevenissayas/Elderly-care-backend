@@ -9,7 +9,8 @@ export const signup = async (req, res) => {
     const user = req.body
     if (!user.name || !user.email || !user.password){
         return res.status(400).json({
-            message: "Please fill all the fields"
+            message: "Please fill all the fields",
+            success: false
         })
     }
     
@@ -17,7 +18,7 @@ export const signup = async (req, res) => {
         const email = user.email
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(409).json({ message: "Email is already registered" });
+            return res.status(409).json({ message: "Email is already registered", success: false });
         }
 
         const counter = await Counter.findByIdAndUpdate(
@@ -37,7 +38,7 @@ export const signup = async (req, res) => {
 
         await newUser.save();
 
-        res.status(201).json({ success: true, data: newUser })
+        res.status(201).json({ success: true, message: "user signed up sucessfully", data: newUser })
     }catch(error){
         console.error("Error in user.controller:", error.message)
         res.status(500).json({ success: false, message: "server error"})
@@ -89,6 +90,7 @@ export const updateProfile = async (req, res) => {
         if (!updatedUser) {
           return res.status(404).json({ message: "User not found" });
         }
+        
     
         res.status(200).json({ message: "Profile updated", data: updatedUser });
       } catch (error) {
