@@ -160,31 +160,60 @@ export const getProfile = async (req, res) => {
   }
 };
 
-
 export const assignTask = async (req, res) => {
-    const assignedBy = req.params.id
-    const { schedule,frequency, startTime, endTime, assignedTo } = req.body;
+    const assignedBy = req.user._id;
+    const assignedToParam = req.params.id;
 
-    const task = new Task({ schedule, frequency, startTime, endTime, assignedTo, assignedBy});
-    await task.save();
+    const { schedule, frequency, startTime, endTime } = req.body;
 
+    let assignedTo = [];
 
-    if (assignedTo) {
+    if (assignedToParam) {
+        if (!assignedToParam.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ message: "Invalid user ID" });
+        }
 
-        const user = await User.findById(assignedTo);
+        const user = await User.findById(assignedToParam);
         if (!user) return res.status(404).json({ message: "User not found" });
-
-        user.tasks.push(task._id);
-        await user.save();
-
-        return res.status(200).json({ message: "Task assigned to user" });
+        assignedTo = [user._id]; 
     } else {
         const allUsers = await User.find();
-        await Promise.all(allUsers.map(user => {
-        user.tasks.push(task._id);
-        return user.save();
-        }));
+        assignedTo = allUsers.map(user => user._id);
+    }
 
+    const task = new Task({ schedule, frequency, startTime, endTime, assignedTo });
+    await task.save();
+
+    if (assignedToParam) {
+        await User.findByIdAndUpdate(assignedToParam, { $push: { tasks: task._id } });
+        return res.status(200).json({ message: "Task assigned to user" });
+    } else {
+        await User.updateMany({}, { $push: { tasks: task._id } });
         return res.status(200).json({ message: "Task assigned to all users" });
     }
 };
+
+export const deleteUser = async (req, res) => {
+    try {
+        if (!req.user || req.user.role !== "nurse") {
+        return res.status(403).json({ message: "Access denied. Only nurses can delete users." });
+        }
+
+        const { userId } = req.params;
+
+        if (req.user.userId === userId) {
+        return res.status(400).json({ message: "You cannot delete your own account." });
+        }
+
+        const deletedUser = await User.findOneAndDelete({ id: userId });
+
+        if (!deletedUser) {
+        return res.status(404).json({ message: "User not found." });
+        }
+
+        res.status(200).json({ message: "User deleted successfully." });
+  } catch (error) {
+        console.error("Delete user error:", error);
+        res.status(500).json({ message: "Server error." });
+  }
+}

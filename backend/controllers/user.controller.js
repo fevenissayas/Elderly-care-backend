@@ -5,7 +5,6 @@ import Counter from "../models/counter.model.js"
 import Nurse from "../models/nurse.model.js"
 
 export const signup = async (req, res) => {
-
     const user = req.body
     if (!user.name || !user.email || !user.password){
         return res.status(400).json({
@@ -109,18 +108,18 @@ export const getNurses = async (req, res) => {
 }
 
 export const assignNurse = async (req, res) => {
-    const userId = req.params.userId
+    const userId = req.user._id
     const {nurseId} = req.body;
 
     try {
-        const nurse = await Nurse.findById(nurseId)
+        const nurse = await Nurse.findOne(nurseId)
         if (!nurse){
             return res.status(404).json({
                 message: "Nurse not Found"
             })
         }
 
-        const user = await User.findById(userId)
+        const user = await User.findOne(userId)
         if (!user){
             return res.status(404).json({
                 message: "user not Found"
@@ -129,9 +128,10 @@ export const assignNurse = async (req, res) => {
 
         user.assignedNurse = nurse._id;
         await user.save();
+        
 
-        if (!nurse.users.includes(user._id)) {
-            nurse.users.push(user._id);
+        if (!nurse.assignedElders.includes(user._id)) {
+            nurse.assignedElders.push(user._id);
             await nurse.save();
         }
         
@@ -141,3 +141,21 @@ export const assignNurse = async (req, res) => {
       res.status(500).json({ message: "Failed to assign nurse", error: error.message });
     }
 }  
+
+export const getProfile = async (req, res) => {
+  const userId = req.user.id;
+  console.log("req.user:", req.user);
+
+
+  try {
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User profile fetched", data: user });
+  } catch (error) {
+    console.error("Failed to get user profile:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};

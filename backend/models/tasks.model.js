@@ -9,11 +9,11 @@ const tasks = mongoose.Schema({
     },
 
     startTime: {
-        type: Date,
+        type: String,
     },
 
     endTime: {
-        type: Date,
+        type: String,
     },
     
     frequency:{
